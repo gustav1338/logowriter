@@ -4,21 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Logo Writer 2.0</title>
-
-  <!-- OG -->
   <meta property="og:title" content="Logo Writer 2.0 🐢">
   <meta property="og:description" content="The classic DOS Logo Writer, running in your browser.">
   <meta property="og:url" content="https://gustav1338.github.io/logowriter/">
   <meta property="og:image" content="https://gustav1338.github.io/logowriter/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-
-  <!-- js-dos 6.22 self-hosted -->
   <script src="./js-dos.js"></script>
-
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       background: #1a1a2e;
       display: flex;
@@ -27,45 +21,102 @@
       min-height: 100dvh;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       color: #e0e0e0;
+      padding-bottom: 8px;
     }
-
-    header {
-      padding: 16px 20px 8px;
-      text-align: center;
-    }
-
+    header { padding: 12px 20px 6px; text-align: center; }
     header h1 {
-      font-size: clamp(1.2rem, 5vw, 2rem);
+      font-size: clamp(1.1rem, 5vw, 1.8rem);
       font-weight: 800;
-      letter-spacing: 0.05em;
       color: #00e5ff;
       text-shadow: 0 0 20px rgba(0,229,255,0.4);
     }
+    header p { font-size: 0.7rem; color: #556; margin-top: 2px; }
 
-    header p {
-      font-size: 0.75rem;
-      color: #556;
-      margin-top: 4px;
-    }
-
-    #dos-container {
-      width: 100%;
-      max-width: 800px;
-      padding: 0 12px 12px;
-    }
-
-    /* js-dos wraps the canvas in a div.dosbox-container */
+    #dos-container { width: 100%; max-width: 800px; padding: 0 8px 4px; }
     #jsdos {
       width: 100%;
       display: block;
+      aspect-ratio: 4/3;
+      background: #000;
+      border-radius: 8px;
     }
 
-    .hint {
-      margin-top: 10px;
-      font-size: 0.72rem;
-      color: #445;
-      text-align: center;
+    /* ── On-screen keyboard ── */
+    #kb-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin: 8px auto 0;
+      background: #00e5ff22;
+      border: 1px solid #00e5ff44;
+      color: #00e5ff;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      width: calc(100% - 16px);
+      max-width: 784px;
     }
+    #kb-toggle:active { background: #00e5ff33; }
+
+    #keyboard {
+      display: none;
+      width: 100%;
+      max-width: 800px;
+      padding: 0 8px;
+      margin-top: 6px;
+      flex-direction: column;
+      gap: 4px;
+    }
+    #keyboard.open { display: flex; }
+
+    .kb-row {
+      display: flex;
+      gap: 3px;
+      justify-content: center;
+    }
+
+    .k {
+      flex: 1;
+      min-width: 0;
+      height: 38px;
+      background: #2a2a45;
+      border: 1px solid #3a3a60;
+      border-bottom: 3px solid #1a1a35;
+      border-radius: 5px;
+      color: #e0e0ff;
+      font-size: clamp(0.6rem, 2.5vw, 0.85rem);
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      transition: background 0.05s;
+      text-align: center;
+      line-height: 1.1;
+    }
+    .k:active, .k.pressed {
+      background: #00e5ff33;
+      border-color: #00e5ff66;
+      color: #00e5ff;
+    }
+    .k.wide   { flex: 1.5; }
+    .k.wider  { flex: 2; }
+    .k.widest { flex: 4; }
+    .k.accent {
+      background: #1e3a4a;
+      border-color: #00e5ff44;
+      color: #00e5ff;
+      font-size: clamp(0.55rem, 2vw, 0.75rem);
+    }
+    .k.accent:active { background: #00e5ff22; }
   </style>
 </head>
 <body>
@@ -76,15 +127,216 @@
 
   <div id="dos-container">
     <canvas id="jsdos" style="width:100%;height:auto;aspect-ratio:4/3;background:#000;border-radius:8px;display:block;"></canvas>
-    <p class="hint">Click ▶ to start · tap screen for keyboard</p>
+  </div>
+
+  <button id="kb-toggle" onclick="toggleKeyboard()">⌨️ KEYBOARD</button>
+
+  <div id="keyboard">
+    <!-- Row 1: numbers -->
+    <div class="kb-row">
+      <div class="k" data-key="192" data-char="`">`</div>
+      <div class="k" data-key="49"  data-char="1">1</div>
+      <div class="k" data-key="50"  data-char="2">2</div>
+      <div class="k" data-key="51"  data-char="3">3</div>
+      <div class="k" data-key="52"  data-char="4">4</div>
+      <div class="k" data-key="53"  data-char="5">5</div>
+      <div class="k" data-key="54"  data-char="6">6</div>
+      <div class="k" data-key="55"  data-char="7">7</div>
+      <div class="k" data-key="56"  data-char="8">8</div>
+      <div class="k" data-key="57"  data-char="9">9</div>
+      <div class="k" data-key="48"  data-char="0">0</div>
+      <div class="k" data-key="189" data-char="-">-</div>
+      <div class="k" data-key="187" data-char="=">=</div>
+      <div class="k wide" data-key="8">⌫</div>
+    </div>
+    <!-- Row 2: QWERTY -->
+    <div class="kb-row">
+      <div class="k wide" data-key="9">TAB</div>
+      <div class="k" data-key="81" data-char="Q">Q</div>
+      <div class="k" data-key="87" data-char="W">W</div>
+      <div class="k" data-key="69" data-char="E">E</div>
+      <div class="k" data-key="82" data-char="R">R</div>
+      <div class="k" data-key="84" data-char="T">T</div>
+      <div class="k" data-key="89" data-char="Y">Y</div>
+      <div class="k" data-key="85" data-char="U">U</div>
+      <div class="k" data-key="73" data-char="I">I</div>
+      <div class="k" data-key="79" data-char="O">O</div>
+      <div class="k" data-key="80" data-char="P">P</div>
+      <div class="k" data-key="219" data-char="[">[</div>
+      <div class="k" data-key="221" data-char="]">]</div>
+      <div class="k" data-key="220" data-char="\">\</div>
+    </div>
+    <!-- Row 3: ASDF -->
+    <div class="kb-row">
+      <div class="k wider" data-key="20">CAPS</div>
+      <div class="k" data-key="65" data-char="A">A</div>
+      <div class="k" data-key="83" data-char="S">S</div>
+      <div class="k" data-key="68" data-char="D">D</div>
+      <div class="k" data-key="70" data-char="F">F</div>
+      <div class="k" data-key="71" data-char="G">G</div>
+      <div class="k" data-key="72" data-char="H">H</div>
+      <div class="k" data-key="74" data-char="J">J</div>
+      <div class="k" data-key="75" data-char="K">K</div>
+      <div class="k" data-key="76" data-char="L">L</div>
+      <div class="k" data-key="186" data-char=";">;</div>
+      <div class="k" data-key="222" data-char="'">'</div>
+      <div class="k wider" data-key="13">↵ ENTER</div>
+    </div>
+    <!-- Row 4: ZXCV -->
+    <div class="kb-row">
+      <div class="k wider" id="shift-key" data-key="16" data-toggle="shift">⇧ SHIFT</div>
+      <div class="k" data-key="90" data-char="Z">Z</div>
+      <div class="k" data-key="88" data-char="X">X</div>
+      <div class="k" data-key="67" data-char="C">C</div>
+      <div class="k" data-key="86" data-char="V">V</div>
+      <div class="k" data-key="66" data-char="B">B</div>
+      <div class="k" data-key="78" data-char="N">N</div>
+      <div class="k" data-key="77" data-char="M">M</div>
+      <div class="k" data-key="188" data-char=",">,</div>
+      <div class="k" data-key="190" data-char=".">.</div>
+      <div class="k" data-key="191" data-char="/">/</div>
+      <div class="k wider" data-key="16" data-toggle="shift">⇧ SHIFT</div>
+    </div>
+    <!-- Row 5: space + arrows -->
+    <div class="kb-row">
+      <div class="k wider" data-key="27">ESC</div>
+      <div class="k widest" data-key="32" data-char=" ">SPACE</div>
+      <div class="k" data-key="38">▲</div>
+      <div class="k" data-key="40">▼</div>
+      <div class="k" data-key="37">◀</div>
+      <div class="k" data-key="39">▶</div>
+      <div class="k wider" data-key="27">ESC</div>
+    </div>
+    <!-- Row 6: Logo Writer shortcuts -->
+    <div class="kb-row">
+      <div class="k accent" data-logo="FD 10\r">FD 10</div>
+      <div class="k accent" data-logo="BK 10\r">BK 10</div>
+      <div class="k accent" data-logo="RT 90\r">RT 90</div>
+      <div class="k accent" data-logo="LT 90\r">LT 90</div>
+      <div class="k accent" data-logo="PENUP\r">PENUP</div>
+      <div class="k accent" data-logo="PENDOWN\r">PENDOWN</div>
+      <div class="k accent" data-logo="CS\r">CLEARSCREEN</div>
+      <div class="k accent" data-logo="HOME\r">HOME</div>
+    </div>
   </div>
 
   <script>
-    Dos(document.getElementById("jsdos"), {
+    var dosCI = null;
+    var shiftOn = false;
+    var canvas = document.getElementById('jsdos');
+
+    Dos(canvas, {
       wdosboxUrl: "./wdosbox.js",
     }).ready(function(fs, main) {
       fs.extract("./logowr.zip").then(function() {
-        main(["-c", "logowr.com"]);
+        main(["-c", "logowr.com"]).then(function(ci) {
+          dosCI = ci;
+        });
+      });
+    });
+
+    function toggleKeyboard() {
+      var kb = document.getElementById('keyboard');
+      kb.classList.toggle('open');
+      var btn = document.getElementById('kb-toggle');
+      btn.textContent = kb.classList.contains('open') ? '⌨️ HIDE KEYBOARD' : '⌨️ KEYBOARD';
+    }
+
+    function sendKey(keyCode, isDown) {
+      if (!dosCI) return;
+      dosCI.simulateKeyEvent(keyCode, isDown);
+    }
+
+    function typeString(str) {
+      if (!dosCI) return;
+      // Replace \r with Enter
+      str = str.replace(/\\r/g, '\r');
+      var i = 0;
+      function next() {
+        if (i >= str.length) return;
+        var ch = str[i++];
+        var code = ch === '\r' ? 13 : ch.toUpperCase().charCodeAt(0);
+        dosCI.simulateKeyEvent(code, true);
+        setTimeout(function() {
+          dosCI.simulateKeyEvent(code, false);
+          setTimeout(next, 60);
+        }, 60);
+      }
+      next();
+    }
+
+    // Flash visual feedback
+    function flashKey(el) {
+      el.classList.add('pressed');
+      setTimeout(function() { el.classList.remove('pressed'); }, 150);
+    }
+
+    // Wire up all keys
+    document.querySelectorAll('.k').forEach(function(el) {
+      el.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        flashKey(el);
+
+        // Logo shortcut
+        if (el.dataset.logo) {
+          typeString(el.dataset.logo);
+          return;
+        }
+
+        // Shift toggle
+        if (el.dataset.toggle === 'shift') {
+          shiftOn = !shiftOn;
+          document.querySelectorAll('[data-toggle="shift"]').forEach(function(s) {
+            s.style.background = shiftOn ? '#00e5ff33' : '';
+            s.style.color = shiftOn ? '#00e5ff' : '';
+          });
+          sendKey(16, true);
+          return;
+        }
+
+        var keyCode = parseInt(el.dataset.key);
+        sendKey(keyCode, true);
+
+        setTimeout(function() {
+          sendKey(keyCode, false);
+          // Release shift after one key if shift is on and this wasn't the shift key
+          if (shiftOn && keyCode !== 16) {
+            shiftOn = false;
+            sendKey(16, false);
+            document.querySelectorAll('[data-toggle="shift"]').forEach(function(s) {
+              s.style.background = '';
+              s.style.color = '';
+            });
+          }
+        }, 100);
+      }, { passive: false });
+
+      // Also support mouse clicks for desktop testing
+      el.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        flashKey(el);
+        if (el.dataset.logo) { typeString(el.dataset.logo); return; }
+        if (el.dataset.toggle === 'shift') {
+          shiftOn = !shiftOn;
+          document.querySelectorAll('[data-toggle="shift"]').forEach(function(s) {
+            s.style.background = shiftOn ? '#00e5ff33' : '';
+            s.style.color = shiftOn ? '#00e5ff' : '';
+          });
+          sendKey(16, true);
+          return;
+        }
+        var keyCode = parseInt(el.dataset.key);
+        sendKey(keyCode, true);
+        setTimeout(function() {
+          sendKey(keyCode, false);
+          if (shiftOn && keyCode !== 16) {
+            shiftOn = false;
+            sendKey(16, false);
+            document.querySelectorAll('[data-toggle="shift"]').forEach(function(s) {
+              s.style.background = ''; s.style.color = '';
+            });
+          }
+        }, 100);
       });
     });
   </script>
